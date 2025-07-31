@@ -95,6 +95,9 @@ class SystemAudit:
 
     def __check_config_files(self):
         try:
+            print("###################################")
+            print("            CONFIG FILES           ")
+            print("###################################")
             # Revisa las configuraciones de sudo
             sudo_config = subprocess.run(
                 ['grep', '-Ev', r'^\s*#|^$', '/etc/sudoers'],
