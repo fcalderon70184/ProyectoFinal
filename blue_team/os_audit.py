@@ -142,3 +142,8 @@ class SystemAudit:
             print(f"[ERROR] Error en comando: {e}")
         except Exception as e:
             print(f"[ERROR] Error inesperado: {e}")
+
+if __name__ == "__main__":
+
+    audit = SystemAudit()
+    audit.run_audit()
