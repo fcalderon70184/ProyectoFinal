@@ -21,7 +21,8 @@ class Scanner:
         """
         Realiza un escaneo avanzado con las opciones:
         -Pn (sin ping), -T3 (velocidad media),
-        -sSV (detección de versión y servicio), -n (sin DNS).
+        -sSV (detección de versión y servicio), -n (sin DNS),
+        -p 22,80,443,8080 (escaneo contra puertos específicos)
         """
         print(f"[+] Escaneando {self.target} con escaneo avanzado (-Pn -T3 -sSV -n -p 22,80,443,8080)...")
         resultado = self.nm.scan(hosts=self.target, arguments='-Pn -T3 -sSV -n -p 22,80,443,8080')
@@ -96,4 +97,5 @@ if __name__ == "__main__":
 
     # Generar el reporte
     scanner.generar_reporte()
+
 
