@@ -4,6 +4,13 @@ import platform
 import subprocess
 
 class SystemAudit:
+    """
+    Clase para realizar un análisis del sistema operativo y la configuración del entorno.
+
+    Se muestra información del sistema, usuarios, grupos, puertos abiertos,
+    servicios activos, archivos de configuración críticos y tareas cron.
+    """
+    
     def __init__(self):
         si = platform.uname()
         self.os = si.system
@@ -14,6 +21,9 @@ class SystemAudit:
         self.architecture = platform.processor() or si.machine
 
     def run_audit(self):
+        """
+        Se ejecuta el análisis del sistema operativo
+        """
         try:
             self._get_users_groups()
             self._check_open_ports()
@@ -23,9 +33,15 @@ class SystemAudit:
             print(f"[ERROR] No se pudo ejecutar el análisis. Detalles:\n{e}")
 
     def _run(self, cmd, check=False):
+        """
+        Ejecuta un comando del sistema usando subprocess y captura su salida.
+        """
         return subprocess.run(cmd, capture_output=True, text=True, check=check)
 
     def _get_users_groups(self):
+        """
+        Obtiene información sobre los usuarios y grupos en el sistema
+        """
         try:
             users = self._run(['cut', '-d:', '-f1', '/etc/passwd'])
             groups = self._run(['cut', '-d:', '-f1', '/etc/group'])
@@ -42,6 +58,10 @@ class SystemAudit:
             print(f"[ERROR] users/groups: {e}")
 
     def _check_open_ports(self):
+        """
+        Muestra los puertos abiertos del sistema utilizando la 
+        herramienta de red 'ss'
+        """
         try:
             ports_results = self._run(['ss', '-tuln'])
             print("###################################")
@@ -52,8 +72,11 @@ class SystemAudit:
             print(f"[ERROR] ports: {e}")
 
     def _running_services(self):
+        """
+        Muestra los servicios y procesos en ejecución usando 
+        el comando `ps aux`.
+        """
         try:
-            # En Linux es 'ps aux' (sin guion)
             services = self._run(['ps', 'aux'])
             print("###################################")
             print("             SERVICIOS             ")
@@ -63,10 +86,13 @@ class SystemAudit:
             print(f"[ERROR] procesos: {e}")
 
     def _check_config_files(self):
+        """
+        Verifica archivos de configuración críticos y 
+        tareas programadas del sistema.
+        """
         print("###################################")
         print("            CONFIG FILES           ")
         print("###################################")
-        # /etc/sudoers (restringido si no eres root)
         try:
             if os.geteuid() == 0:
                 sudo_config = self._run(
@@ -91,7 +117,8 @@ class SystemAudit:
         except Exception as e:
             print(f"[ERROR] sshd_config: {e}\n")
 
-        # Cron
+        # Se verifican las tareas Cron programadas
+        # y sus detalles
         try:
             print("[+] Crontab del usuario:")
             out = subprocess.check_output(["crontab", "-l"], text=True)
@@ -114,3 +141,4 @@ class SystemAudit:
 
 if __name__ == "__main__":
     SystemAudit().run_audit()
+
