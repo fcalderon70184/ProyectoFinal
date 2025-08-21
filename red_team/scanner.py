@@ -16,16 +16,30 @@ class Scanner:
         self.target = target
         self.nm = nmap.PortScanner()
         self.scan_results = {}
+        
+    def escaneo_basico(self):
+        """
+        Realiza un escaneo básico tipo SYN (-sS).
+        """
+        print(f"[+] Escaneando {self.target} con escaneo básico (SYN scan)...")
+        resultado = self.nm.scan(hosts=self.target, arguments='-sS')
+        resultado = json.dumps(resultado, indent=4)
+        if self.target in self.nm.all_hosts():
+            self.scan_results['basico'] = self.nm[self.target]
+        else:
+            print(f"[!] No se detectó el host {self.target} en el escaneo básico.")
+
+        return resultado
 
     def escaneo_avanzado(self):
         """
         Realiza un escaneo avanzado con las opciones:
-        -Pn (sin ping), -T3 (velocidad media),
+        -Pn (sin ping), -T3 (velocidad lenta, para evadir detecciones),
         -sSV (detección de versión y servicio), -n (sin DNS),
         -p 22,80,443,8080 (escaneo contra puertos específicos)
         """
-        print(f"[+] Escaneando {self.target} con escaneo avanzado (-Pn -T3 -sSV -n -p 22,80,443,8080)...")
-        resultado = self.nm.scan(hosts=self.target, arguments='-Pn -T3 -sSV -n -p 22,80,443,8080')
+        print(f"[+] Escaneando {self.target} con escaneo avanzado (-Pn -T2 -sSV -n -p 22,80,443,8080)...")
+        resultado = self.nm.scan(hosts=self.target, arguments='-Pn -T2 -sSV -n -p 22,80,443,8080')
         resultado = json.dumps(resultado, indent=4)
         if self.target in self.nm.all_hosts():
             self.scan_results['avanzado'] = self.nm[self.target]
@@ -92,10 +106,11 @@ if __name__ == "__main__":
     # Crear el objeto Scanner
     scanner = Scanner(objetivo)
 
+    # Ejecutar escaneo básico
+    print(scanner.escaneo_basico())
+
     # Ejecutar escaneo avanzado
     print(scanner.escaneo_avanzado())
 
     # Generar el reporte
     scanner.generar_reporte()
-
-
